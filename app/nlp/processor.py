@@ -213,7 +213,7 @@ class TextProcessor:
             if len(word) <= 3:
                 found = word in tokens
             else:
-                stem = word[: min(7, len(word))]
+                stem = word[: min(5, len(word))]
                 found = any(token.startswith(stem) for token in tokens)
             if found:
                 hits += 1
