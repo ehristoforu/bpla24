@@ -176,3 +176,15 @@ bpla24/
         year = {2026}
     }
 ```
+
+---
+
+## Star History
+
+<a href="https://www.star-history.com/?repos=ehristoforu%2Fbpla24&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=ehristoforu/bpla24&type=date&theme=dark&legend=top-left&sealed_token=EawSCOQV9hVNGTGr-3-2CGEA7idxkYxlOQuXyFx7kiNwfveVwId5orSpLdWL9eczdbBO1gl48MWeNudEx8KQ1NfPL0S0fWntsWH5ZtIBpqfaoh5RaayswQ" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=ehristoforu/bpla24&type=date&legend=top-left&sealed_token=EawSCOQV9hVNGTGr-3-2CGEA7idxkYxlOQuXyFx7kiNwfveVwId5orSpLdWL9eczdbBO1gl48MWeNudEx8KQ1NfPL0S0fWntsWH5ZtIBpqfaoh5RaayswQ" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=ehristoforu/bpla24&type=date&legend=top-left&sealed_token=EawSCOQV9hVNGTGr-3-2CGEA7idxkYxlOQuXyFx7kiNwfveVwId5orSpLdWL9eczdbBO1gl48MWeNudEx8KQ1NfPL0S0fWntsWH5ZtIBpqfaoh5RaayswQ" />
+ </picture>
+</a>
