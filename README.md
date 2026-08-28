@@ -85,7 +85,7 @@ bpla24/
 
 1. Клонируйте репозиторий:
    ```bash
-   git clone https://github.com/your-username/bpla24.git
+   git clone https://github.com/ehristoforu/bpla24.git
    cd bpla24
    ```
 
@@ -116,7 +116,7 @@ bpla24/
 2. Подготовьте окружение:
    ```bash
    cd /opt
-   git clone https://github.com/your-username/bpla24.git
+   git clone https://github.com/ehristoforu/bpla24.git
    cd bpla24
    python3 -m venv venv
    source venv/bin/activate
