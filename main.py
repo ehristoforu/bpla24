@@ -34,7 +34,8 @@ async def setup_bot_commands(bot: Bot) -> None:
 async def main() -> None:
     logging.basicConfig(
         level=logging.INFO,
-        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+        format="%(asctime)s | %(levelname)-7s | %(name)-20s | %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
     )
     if not settings.telegram_bot_token or settings.telegram_bot_token == "1234567890:replace_me":
         raise RuntimeError("Укажите валидный TELEGRAM_BOT_TOKEN в файле .env")

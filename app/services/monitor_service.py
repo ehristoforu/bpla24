@@ -32,6 +32,7 @@ class MonitorService:
         self._cached_notices: list[Notice] = []
         self._last_update: datetime | None = None
         self._lock = asyncio.Lock()
+        self._is_refreshing: bool = False
 
     def _get_all_sources(self) -> list[SourceConfig]:
         sources: list[SourceConfig] = list(self.nlp.global_sources)
@@ -49,27 +50,39 @@ class MonitorService:
             )
         return sources
 
-    async def refresh_sources(self) -> list[Notice]:
-        all_sources = self._get_all_sources()
-        collected_notices: list[Notice] = []
+    async def refresh_sources(self, force: bool = False) -> list[Notice]:
+        # Если опрос уже идет, не блокируем и не запускаем параллельный шквал
+        if self._is_refreshing:
+            async with self._lock:
+                return list(self._cached_notices)
 
-        async with aiohttp.ClientSession() as session:
-            tasks = [self.ingestion.fetch_source(session, src) for src in all_sources]
-            results = await asyncio.gather(*tasks, return_exceptions=True)
+        self._is_refreshing = True
+        try:
+            all_sources = self._get_all_sources()
+            collected_notices: list[Notice] = []
 
-        for src, res in zip(all_sources, results):
-            if isinstance(res, Exception):
-                logging.debug("Ошибка получения источника %s: %s", src.name, res)
-                continue
-            for n in res:
-                if n.kind != DangerKind.OTHER and not self.nlp.is_ignored(f"{n.title} {n.text}"):
-                    collected_notices.append(n)
+            timeout = aiohttp.ClientTimeout(total=settings.http_timeout_seconds)
+            connector = aiohttp.TCPConnector(limit=30, ssl=False)
+            async with aiohttp.ClientSession(timeout=timeout, connector=connector) as session:
+                tasks = [self.ingestion.fetch_source(session, src) for src in all_sources]
+                results = await asyncio.gather(*tasks, return_exceptions=True)
 
-        async with self._lock:
-            self._cached_notices = collected_notices
-            self._last_update = datetime.now(timezone.utc)
+            for src, res in zip(all_sources, results):
+                if isinstance(res, Exception):
+                    logging.debug("Ошибка получения источника %s: %s", src.name, res)
+                    continue
+                for n in res:
+                    if n.kind != DangerKind.OTHER and not self.nlp.is_ignored(f"{n.title} {n.text}"):
+                        collected_notices.append(n)
 
-        return collected_notices
+            async with self._lock:
+                self._cached_notices = collected_notices
+                self._last_update = datetime.now(timezone.utc)
+
+            logging.info("Собрано актуальных оповещений: %d из %d источников", len(collected_notices), len(all_sources))
+            return collected_notices
+        finally:
+            self._is_refreshing = False
 
     def filter_notices_for_user(self, subscriber: Subscriber, notices: list[Notice]) -> list[Notice]:
         if subscriber.notify_scope == ScopeType.ALL:

@@ -176,3 +176,7 @@ data/*.db
 !data/sources.json
 logs/
 *.log
+.cache/
+.pytest_cache/
+__pycache__/
+*.pyc

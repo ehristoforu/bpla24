@@ -1,3 +1,4 @@
+import asyncio
 from contextlib import suppress
 from html import escape
 from aiogram import Bot, F, Router
@@ -112,8 +113,15 @@ class BotRouter:
         @r.message(Command("status"))
         @r.message(F.text == "📊 Статус и угрозы")
         async def cmd_status(message: Message) -> None:
-            if message.from_user and message.bot:
-                await self._send_status_screen(message.bot, message.chat.id, message.from_user.id)
+            if not message.from_user or not message.bot:
+                return
+            status_msg = await message.answer("⏳ <i>Загрузка актуального статуса...</i>")
+            await self._send_status_screen(
+                message.bot,
+                message.chat.id,
+                message.from_user.id,
+                edit_message_id=status_msg.message_id,
+            )
 
         @r.message(Command("settings"))
         @r.message(F.text == "⚙️ Настройки")
@@ -220,8 +228,17 @@ class BotRouter:
             if not callback.from_user or not callback.message or not callback.bot:
                 return
             with suppress(Exception):
-                await callback.answer("🔄 Обновление данных...")
-            await self.monitor.refresh_sources()
+                await callback.answer("🔄 Обновление статуса...")
+
+            # Немедленно показываем пользователю индикацию загрузки
+            with suppress(Exception):
+                await callback.message.edit_text("⏳ <i>Обновление данных из оперативных источников...</i>")
+
+            # Запускаем фоновое обновление источников не блокируя поток
+            asyncio.create_task(self.monitor.refresh_sources())
+
+            # Ждем короткую паузу и показываем актуальное состояние из кэша
+            await asyncio.sleep(0.5)
             await self._send_status_screen(
                 callback.bot,
                 callback.message.chat.id,
