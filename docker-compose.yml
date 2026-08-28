@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  bpla24-bot:
+    build: .
+    container_name: bpla24-bot
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data

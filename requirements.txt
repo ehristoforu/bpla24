@@ -1,0 +1,8 @@
+aiogram==3.20.0.post0
+aiohttp==3.11.18
+aiosqlite==0.21.0
+beautifulsoup4==4.13.4
+feedparser==6.0.11
+pydantic==2.10.6
+pydantic-settings==2.8.0
+python-dotenv==1.1.0
