@@ -1,3 +1,4 @@
+from contextlib import suppress
 from html import escape
 from aiogram import Bot, F, Router
 from aiogram.filters import Command, CommandStart
@@ -112,7 +113,6 @@ class BotRouter:
         @r.message(F.text == "📊 Статус и угрозы")
         async def cmd_status(message: Message) -> None:
             if message.from_user and message.bot:
-                await message.answer("📊 Обновляю статус...", reply_markup=get_main_reply_keyboard())
                 await self._send_status_screen(message.bot, message.chat.id, message.from_user.id)
 
         @r.message(Command("settings"))
@@ -205,7 +205,8 @@ class BotRouter:
             scope_val = callback.data.split(":", 1)[1]
             scope = ScopeType.REGION if scope_val == "region" else ScopeType.ALL
             await self.db.set_notify_scope(callback.from_user.id, scope)
-            await callback.answer("✅ Режим оповещений обновлен")
+            with suppress(Exception):
+                await callback.answer("✅ Режим оповещений обновлен")
             assert callback.bot is not None
             await self._send_status_screen(
                 callback.bot,
@@ -218,8 +219,9 @@ class BotRouter:
         async def cb_refresh_status(callback: CallbackQuery) -> None:
             if not callback.from_user or not callback.message or not callback.bot:
                 return
+            with suppress(Exception):
+                await callback.answer("🔄 Обновление данных...")
             await self.monitor.refresh_sources()
-            await callback.answer("✅ Статус и источники обновлены")
             await self._send_status_screen(
                 callback.bot,
                 callback.message.chat.id,
@@ -286,7 +288,8 @@ class BotRouter:
             reg = self.nlp.regions[reg_idx]
             await self.db.upsert_user(callback.from_user.id, reg.name, "")
             await state.clear()
-            await callback.answer("✅ Настройки сохранены!")
+            with suppress(Exception):
+                await callback.answer("✅ Настройки сохранены!")
             await callback.message.answer("🎉 Вы успешно подписались на оповещения!", reply_markup=get_main_reply_keyboard())
             await self._send_status_screen(callback.bot, callback.message.chat.id, callback.from_user.id)
 
@@ -300,7 +303,8 @@ class BotRouter:
             city_name = reg.cities[city_idx].name
             await self.db.upsert_user(callback.from_user.id, reg.name, city_name)
             await state.clear()
-            await callback.answer("✅ Настройки сохранены!")
+            with suppress(Exception):
+                await callback.answer("✅ Настройки сохранены!")
             await callback.message.answer("🎉 Вы успешно подписались на оповещения!", reply_markup=get_main_reply_keyboard())
             await self._send_status_screen(callback.bot, callback.message.chat.id, callback.from_user.id)
 
