@@ -1,10 +1,14 @@
 import asyncio
+import logging
+from collections import OrderedDict
 from contextlib import suppress
 from html import escape
+from time import monotonic
 from aiogram import Bot, F, Router
 from aiogram.filters import Command, CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
+from aiogram.dispatcher.middlewares.base import BaseMiddleware
 
 from app.bot.keyboards.inline import (
     get_cities_inline_keyboard,
@@ -24,12 +28,57 @@ from app.services.info_service import InfoService
 from app.services.monitor_service import MonitorService
 
 
+class DuplicateUpdateMiddleware(BaseMiddleware):
+    """Не дает повторно обработать один и тот же клик/текст за короткий интервал."""
+
+    def __init__(self, window_seconds: float = 3.0) -> None:
+        self.window_seconds = window_seconds
+        self._recent: OrderedDict[tuple, float] = OrderedDict()
+        self._lock = asyncio.Lock()
+
+    async def __call__(self, handler, event, data):
+        if isinstance(event, Message) and event.from_user:
+            key = (
+                "message",
+                event.chat.id,
+                event.from_user.id,
+                event.text or event.caption or "",
+            )
+        elif isinstance(event, CallbackQuery) and event.from_user:
+            key = (
+                "callback",
+                event.from_user.id,
+                event.message.message_id if event.message else 0,
+                event.data or "",
+            )
+        else:
+            return await handler(event, data)
+
+        now = monotonic()
+        async with self._lock:
+            expired = [item for item, timestamp in self._recent.items() if now - timestamp > self.window_seconds]
+            for item in expired:
+                self._recent.pop(item, None)
+
+            previous = self._recent.get(key)
+            if previous is not None and now - previous <= self.window_seconds:
+                logging.warning("Повторный апдейт пропущен: key=%s", key)
+                return None
+            self._recent[key] = now
+
+        logging.info("Обработка апдейта: type=%s key=%s", key[0], key)
+        return await handler(event, data)
+
+
 class BotRouter:
     def __init__(self, db: IDatabase, nlp: TextProcessor, monitor: MonitorService) -> None:
         self.db = db
         self.nlp = nlp
         self.monitor = monitor
         self.router = Router()
+        self._deduplication = DuplicateUpdateMiddleware()
+        self.router.message.outer_middleware(self._deduplication)
+        self.router.callback_query.outer_middleware(self._deduplication)
         self._register_routes()
 
     def _is_admin(self, user_id: int) -> bool:
@@ -82,7 +131,12 @@ class BotRouter:
                 )
                 return
             except Exception as exc:
-                logging.debug("Ошибка редактирования сообщения: %s", exc)
+                logging.warning(
+                    "Не удалось изменить сообщение статуса: chat_id=%s message_id=%s error=%s",
+                    chat_id,
+                    edit_message_id,
+                    exc,
+                )
 
         await bot.send_message(
             chat_id=chat_id,
