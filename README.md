@@ -162,3 +162,17 @@ bpla24/
 ## 📄 Лицензия
 
 Проект распространяется под свободной лицензией **GNU General Public License v3.0 (GPL-3.0)**. См. файл [LICENSE](LICENSE).
+
+---
+
+## Citation
+
+```bibtex
+    @software{ehristoforu_BPLA24_2026,
+        author = {ehristoforu},
+        month = aug,
+        title = {{BPLA24}},
+        url = {https://github.com/ehristoforu/bpla24},
+        year = {2026}
+    }
+```
