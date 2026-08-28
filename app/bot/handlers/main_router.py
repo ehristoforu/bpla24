@@ -55,8 +55,8 @@ class BotRouter:
                         reply_markup=get_regions_inline_keyboard(self.nlp.regions, 0),
                     )
                     return
-                except Exception:
-                    pass
+                except Exception as exc:
+                    logging.debug("Ошибка редактирования сообщения: %s", exc)
             await bot.send_message(
                 chat_id=chat_id,
                 text="👋 <b>Добро пожаловать в БПЛА24!</b>\n\nДля начала работы выберите ваш регион:",
@@ -81,8 +81,8 @@ class BotRouter:
                     reply_markup=get_user_actions_inline_keyboard(user.notify_scope),
                 )
                 return
-            except Exception:
-                pass
+            except Exception as exc:
+                logging.debug("Ошибка редактирования сообщения: %s", exc)
 
         await bot.send_message(
             chat_id=chat_id,
@@ -115,12 +115,10 @@ class BotRouter:
         async def cmd_status(message: Message) -> None:
             if not message.from_user or not message.bot:
                 return
-            status_msg = await message.answer("⏳ <i>Загрузка актуального статуса...</i>")
             await self._send_status_screen(
                 message.bot,
                 message.chat.id,
                 message.from_user.id,
-                edit_message_id=status_msg.message_id,
             )
 
         @r.message(Command("settings"))

@@ -73,7 +73,9 @@ async def main() -> None:
 
     logging.info("Бот БПЛА24 (@bpla24) успешно запущен.")
     try:
-        await dp.start_polling(bot)
+        # Сбрасываем старые накопившиеся апдейты при старте
+        await bot.delete_webhook(drop_pending_updates=True)
+        await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())
     finally:
         monitor_task.cancel()
         with suppress(asyncio.CancelledError):
