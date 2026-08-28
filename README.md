@@ -12,11 +12,11 @@
   <a href="https://t.me/bpla24bot">
     <img src="https://img.shields.io/badge/Telegram_Bot-@bpla24bot-2CA5E0?style=flat&logo=telegram&logoColor=white" alt="Telegram Bot" />
   </a>
-  <a href="https://github.com/ehristoforu/bpla24">
+  <a href="https://github.com/ehristoforu/bpla24/fork">
     <img src="https://img.shields.io/badge/Fork-ehristoforu%2Fbpla24-181717?style=flat&logo=github&logoColor=white" alt="Fork Repository" />
   </a>
   <a href="https://github.com/MahasheDev/Russia-Alert-Bot">
-    <img src="https://img.shields.io/badge/Based_on-MahasheDev%2FRussia--Alert--Bot-800080?style=flat&logo=icloud&logoColor=white" alt="Fork Repository" />
+    <img src="https://img.shields.io/badge/Based_on-MahasheDev%2FRussia--Alert--Bot-800080?style=flat&logo=icloud&logoColor=white" alt="Based on Repository" />
   </a>
   <a href="https://github.com/aiogram/aiogram">
     <img src="https://img.shields.io/badge/aiogram-v3.20-2ba84a?style=flat&logo=telegram&logoColor=white" alt="aiogram v3" />
